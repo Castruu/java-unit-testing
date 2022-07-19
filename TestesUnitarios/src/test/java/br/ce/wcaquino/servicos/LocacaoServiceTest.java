@@ -8,6 +8,8 @@ import static br.ce.wcaquino.utils.DataUtils.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
+import br.ce.wcaquino.exceptions.LocadoraException;
+import br.ce.wcaquino.exceptions.MovieWithoutStockException;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -26,7 +28,7 @@ public class LocacaoServiceTest {
 
 
     @Test
-    public void testSameLocationValue() throws Exception {
+    public void sameLocationValueReturnsTrue() throws Exception {
         //Cenário
         LocacaoService locacaoService = new LocacaoService();
         Usuario usuario = new Usuario("User");
@@ -46,7 +48,7 @@ public class LocacaoServiceTest {
 
 
     @Test
-    public void testSameLocationDate() throws Exception {
+    public void sameLocationDateReturnsTrue() throws Exception {
         //Cenário
         LocacaoService locacaoService = new LocacaoService();
         Usuario usuario = new Usuario("User");
@@ -65,7 +67,7 @@ public class LocacaoServiceTest {
     }
 
     @Test
-    public void testSameReturnDate() throws Exception {
+    public void sameDateReturnTrue() throws Exception {
         //Cenário
         LocacaoService locacaoService = new LocacaoService();
         Usuario usuario = new Usuario("User");
@@ -84,8 +86,9 @@ public class LocacaoServiceTest {
     }
 
 
-    @Test(expected = Exception.class)
-    public void testLocationWithNoStockFirst() throws Exception {
+    //Forma Elegante - Sempre utilizar uma exceção personalizada (apenas a exceção importa)
+    @Test(expected = MovieWithoutStockException.class)
+    public void throwsExceptionWhenMovieHasNoStocks() throws Exception {
         //Cenário
         LocacaoService locacaoService = new LocacaoService();
         Usuario usuario = new Usuario("User");
@@ -95,48 +98,40 @@ public class LocacaoServiceTest {
         locacaoService.alugarFilme(usuario, filme);
             // try/catch with Assert.fail();
 
-        //Verificação dentro da anotação @Test
-
 
     }
 
+    //Forma robusta -> Há mais controle sobre a exceção / Útil para verificar a mensagem também
     @Test
-    public void testLocationWithNoStockSecond() {
+    public void throwsExceptionWhenUserIsNull() throws MovieWithoutStockException {
         //Cenário
         LocacaoService locacaoService = new LocacaoService();
-        Usuario usuario = new Usuario("User");
-        Filme filme = new Filme("Filme 1", 0, 5.0);
+        Filme filme = new Filme("Filme 1", 5, 5.0);
 
         //Ação
         try {
-            locacaoService.alugarFilme(usuario, filme);
-            Assert.fail("Deveria lançar exceção");
-        } catch (Exception e) {
+            locacaoService.alugarFilme(null, filme);
+            Assert.fail("Should throw exception");
+        } catch (LocadoraException e) {
             //Verificação
-            Assert.assertThat(e.getMessage(), is("Filme sem estoque"));
+            assertThat(e.getMessage(), is("Usuário vazio"));
         }
     }
 
+    //Forma nova -> Útil para verificar a mensagem também
     @Test
-    public void testLocationWithNoStockThird() throws Exception{
+    public void throwsExceptionWhenMovieIsNull() throws MovieWithoutStockException, LocadoraException {
         //Cenário
         LocacaoService locacaoService = new LocacaoService();
         Usuario usuario = new Usuario("User");
-        Filme filme = new Filme("Filme 1", 0, 5.0);
 
-        //Verificação dentro do cenário
-        expectedException.expect(Exception.class);
-        expectedException.expectMessage("Filme sem estoque");
+        // Verificação dentro do cenário
+        expectedException.expectMessage("Filme vazio");
+        expectedException.expect(LocadoraException.class);
 
         //Ação
-        locacaoService.alugarFilme(usuario, filme);
-        // try/catch with Assert.fail();
-
-
-
-
+        locacaoService.alugarFilme(usuario, null);
     }
-
 
 
 
