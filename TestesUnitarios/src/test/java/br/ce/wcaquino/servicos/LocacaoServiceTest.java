@@ -4,17 +4,21 @@ import br.ce.wcaquino.entidades.Filme;
 import br.ce.wcaquino.entidades.Locacao;
 import br.ce.wcaquino.entidades.Usuario;
 
+import static br.ce.wcaquino.matchers.LocationMatchers.*;
 import static br.ce.wcaquino.utils.DataUtils.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import br.ce.wcaquino.exceptions.LocadoraException;
 import br.ce.wcaquino.exceptions.MovieWithoutStockException;
+import br.ce.wcaquino.matchers.DayOfTheWeekMatcher;
+import br.ce.wcaquino.matchers.LocationMatchers;
 import br.ce.wcaquino.utils.DataUtils;
 import org.junit.*;
 import org.junit.rules.ErrorCollector;
 import org.junit.rules.ExpectedException;
 
+import javax.xml.stream.Location;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -62,7 +66,7 @@ public class LocacaoServiceTest {
         //Verificação
 
         assertEquals(5.0, locacao.getValor(), 0.01);
-        // assertThat(locacao.getValor(), is(equalTo(5.0))); // Em caso de erro, o teste pararia aqui!
+        ///assertThat(locacao.getValor(), is(equalTo(5.0))); // Em caso de erro, o teste pararia aqui!
         // error.checkThat(locacao.getValor(), is(equalTo(6.0)));  Com o error collector, mesmo com erro o teste continua
         // assertThat(locacao.getValor(), is(not(6.0)));
 
@@ -81,8 +85,9 @@ public class LocacaoServiceTest {
 
         //Verificação
 
-        assertTrue(isMesmaData(locacao.getDataLocacao(), new Date()));
-        // assertThat(isMesmaData(locacao.getDataLocacao(), new Date()), is(true));
+        assertThat(locacao.getDataLocacao(), isToday());
+        //assertTrue(isMesmaData(locacao.getDataLocacao(), new Date()));
+        //assertThat(isMesmaData(locacao.getDataLocacao(), new Date()), is(true));
         // error.checkThat(isMesmaData(locacao.getDataLocacao(), new Date()), is(true));
 
 
@@ -101,9 +106,11 @@ public class LocacaoServiceTest {
 
         //Verificação
 
-        assertTrue(isMesmaData(locacao.getDataRetorno(), obterDataComDiferencaDias(1)));
-        // assertThat(isMesmaData(locacao.getDataRetorno(), obterDataComDiferencaDias(1)), is(true));
-        // error.checkThat(isMesmaData(locacao.getDataRetorno(), obterDataComDiferencaDias(1)), is(false));  Com o error collector, mesmo com erro o teste continua
+
+        assertThat(locacao.getDataRetorno(), isTodayWithDaysDifference(1));
+         //assertThat(isMesmaData(locacao.getDataRetorno(), obterDataComDiferencaDias(1)), is(true));
+        //assertTrue(isMesmaData(locacao.getDataRetorno(), obterDataComDiferencaDias(1)));
+        //error.checkThat(isMesmaData(locacao.getDataRetorno(), obterDataComDiferencaDias(1)), is(false));  Com o error collector, mesmo com erro o teste continua
     }
 
     @Test
@@ -118,10 +125,10 @@ public class LocacaoServiceTest {
         Locacao locacao = locacaoService.alugarFilme(usuario, filme);
 
         //Verificação
-        boolean isMonday = verificarDiaSemana(locacao.getDataRetorno(), Calendar.MONDAY);
-        assertTrue(isMonday);
-        // assertThat(isMesmaData(locacao.getDataRetorno(), obterDataComDiferencaDias(1)), is(true));
-        // error.checkThat(isMesmaData(locacao.getDataRetorno(), obterDataComDiferencaDias(1)), is(false));  Com o error collector, mesmo com erro o teste continua
+//        boolean isMonday = verificarDiaSemana(locacao.getDataRetorno(), Calendar.MONDAY);
+//        assertTrue(isMonday);
+        assertThat(locacao.getDataRetorno(), isA(Calendar.SUNDAY));
+//      assertThat(locacao.getDataRetorno(), isAMonday());
     }
 
 
