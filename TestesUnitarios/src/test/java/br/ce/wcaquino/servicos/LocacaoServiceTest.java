@@ -10,10 +10,12 @@ import static org.junit.Assert.*;
 
 import br.ce.wcaquino.exceptions.LocadoraException;
 import br.ce.wcaquino.exceptions.MovieWithoutStockException;
+import br.ce.wcaquino.utils.DataUtils;
 import org.junit.*;
 import org.junit.rules.ErrorCollector;
 import org.junit.rules.ExpectedException;
 
+import java.util.Calendar;
 import java.util.Date;
 
 public class LocacaoServiceTest {
@@ -87,7 +89,9 @@ public class LocacaoServiceTest {
     }
 
     @Test
-    public void sameDateReturnTrue() throws Exception {
+    public void sameReturnDateReturnTrue() throws Exception {
+        Assume.assumeFalse(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
+
         //Cenário
         Usuario usuario = new Usuario("User");
         Filme filme = new Filme("Filme 1", 2, 5.0);
@@ -100,8 +104,24 @@ public class LocacaoServiceTest {
         assertTrue(isMesmaData(locacao.getDataRetorno(), obterDataComDiferencaDias(1)));
         // assertThat(isMesmaData(locacao.getDataRetorno(), obterDataComDiferencaDias(1)), is(true));
         // error.checkThat(isMesmaData(locacao.getDataRetorno(), obterDataComDiferencaDias(1)), is(false));  Com o error collector, mesmo com erro o teste continua
+    }
 
+    @Test
+ //   @Ignore
+    public void locationOnSaturdayShouldReturnOnMonday() throws Exception {
+        Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
+        //Cenário
+        Usuario usuario = new Usuario("User");
+        Filme filme = new Filme("Filme 1", 2, 5.0);
 
+        //Ação
+        Locacao locacao = locacaoService.alugarFilme(usuario, filme);
+
+        //Verificação
+        boolean isMonday = verificarDiaSemana(locacao.getDataRetorno(), Calendar.MONDAY);
+        assertTrue(isMonday);
+        // assertThat(isMesmaData(locacao.getDataRetorno(), obterDataComDiferencaDias(1)), is(true));
+        // error.checkThat(isMesmaData(locacao.getDataRetorno(), obterDataComDiferencaDias(1)), is(false));  Com o error collector, mesmo com erro o teste continua
     }
 
 
@@ -176,6 +196,72 @@ public class LocacaoServiceTest {
 
         //Ação
         locacaoService.alugarFilme(usuario);
+    }
+
+    @Test
+    public void thirdMovieShouldGet25Discount() throws MovieWithoutStockException, LocadoraException {
+        //Cenário
+        Usuario usuario = new Usuario("User");
+        Filme filme1 = new Filme("Filme 1", 2, 10.0);
+        Filme filme2 = new Filme("Filme 2", 2, 10.0);
+        Filme filme3 = new Filme("Filme 3", 2, 10.0); // 7.5
+
+        //Ação
+        Locacao locacao = locacaoService.alugarFilme(usuario, filme1, filme2, filme3);
+
+        //Verificação
+        assertEquals(27.5, locacao.getValor(), 0.01);
+    }
+
+    @Test
+    public void fourthMovieShouldGet50Discount() throws MovieWithoutStockException, LocadoraException {
+        //Cenário
+        Usuario usuario = new Usuario("User");
+        Filme filme1 = new Filme("Filme 1", 2, 10.0);
+        Filme filme2 = new Filme("Filme 2", 2, 10.0);
+        Filme filme3 = new Filme("Filme 3", 2, 10.0); // 7.5
+        Filme filme4 = new Filme("Filme 4", 2, 10.0); // 5
+
+        //Ação
+        Locacao locacao = locacaoService.alugarFilme(usuario, filme1, filme2, filme3, filme4);
+
+        //Verificação
+        assertEquals(32.5, locacao.getValor(), 0.01);
+    }
+
+    @Test
+    public void fifthMovieShouldGet75Discount() throws MovieWithoutStockException, LocadoraException {
+        //Cenário
+        Usuario usuario = new Usuario("User");
+        Filme filme1 = new Filme("Filme 1", 2, 10.0);
+        Filme filme2 = new Filme("Filme 2", 2, 10.0);
+        Filme filme3 = new Filme("Filme 3", 2, 10.0); // 7.5
+        Filme filme4 = new Filme("Filme 4", 2, 10.0); // 5
+        Filme filme5 = new Filme("Filme 5", 2, 10.0); // 2.5
+
+        //Ação
+        Locacao locacao = locacaoService.alugarFilme(usuario, filme1, filme2, filme3, filme4, filme5);
+
+        //Verificação
+        assertEquals(35.0, locacao.getValor(), 0.01);
+    }
+
+    @Test
+    public void sixthMovieShouldGet100Discount() throws MovieWithoutStockException, LocadoraException {
+        //Cenário
+        Usuario usuario = new Usuario("User");
+        Filme filme1 = new Filme("Filme 1", 2, 10.0);
+        Filme filme2 = new Filme("Filme 2", 2, 10.0);
+        Filme filme3 = new Filme("Filme 3", 2, 10.0); // 7.5
+        Filme filme4 = new Filme("Filme 4", 2, 10.0); // 5
+        Filme filme5 = new Filme("Filme 5", 2, 10.0); // 2.5
+        Filme filme6 = new Filme("Filme 6", 2, 10.0);
+
+        //Ação
+        Locacao locacao = locacaoService.alugarFilme(usuario, filme1, filme2, filme3, filme4, filme5, filme6);
+
+        //Verificação
+        assertEquals(35.0, locacao.getValor(), 0.01);
     }
 
 
