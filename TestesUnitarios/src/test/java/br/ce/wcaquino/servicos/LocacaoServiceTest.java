@@ -10,15 +10,16 @@ import static org.junit.Assert.*;
 
 import br.ce.wcaquino.exceptions.LocadoraException;
 import br.ce.wcaquino.exceptions.MovieWithoutStockException;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.ErrorCollector;
 import org.junit.rules.ExpectedException;
 
 import java.util.Date;
 
 public class LocacaoServiceTest {
+
+    // O teste reinicializa as variáveis da classe
+    public LocacaoService locacaoService;
 
     @Rule
     public ErrorCollector error = new ErrorCollector();
@@ -27,10 +28,29 @@ public class LocacaoServiceTest {
     public ExpectedException expectedException = ExpectedException.none();
 
 
+    @Before //-> Executa antes de todos os testes
+    public void setup() {
+        locacaoService = new LocacaoService();
+
+    }
+
+//    @After //-> Executa após todos os testes
+//    public void tearDown() {
+//    }
+//
+//    @BeforeClass //-> Antes da classe ser inicializada
+//    public static void setupClass() {
+//    }
+//
+//    @AfterClass //-> Antes da classe ser inicializaada
+//    public static void tearDownClass() {
+//    }
+
+
+
     @Test
     public void sameLocationValueReturnsTrue() throws Exception {
         //Cenário
-        LocacaoService locacaoService = new LocacaoService();
         Usuario usuario = new Usuario("User");
         Filme filme = new Filme("Filme 1", 2, 5.0);
 
@@ -50,12 +70,12 @@ public class LocacaoServiceTest {
     @Test
     public void sameLocationDateReturnsTrue() throws Exception {
         //Cenário
-        LocacaoService locacaoService = new LocacaoService();
         Usuario usuario = new Usuario("User");
         Filme filme = new Filme("Filme 1", 2, 5.0);
+        Filme filme2 = new Filme("Filme 2", 5, 7.0);
 
         //Ação
-        Locacao locacao = locacaoService.alugarFilme(usuario, filme);
+        Locacao locacao = locacaoService.alugarFilme(usuario, filme, filme2);
 
         //Verificação
 
@@ -69,7 +89,6 @@ public class LocacaoServiceTest {
     @Test
     public void sameDateReturnTrue() throws Exception {
         //Cenário
-        LocacaoService locacaoService = new LocacaoService();
         Usuario usuario = new Usuario("User");
         Filme filme = new Filme("Filme 1", 2, 5.0);
 
@@ -90,13 +109,13 @@ public class LocacaoServiceTest {
     @Test(expected = MovieWithoutStockException.class)
     public void throwsExceptionWhenMovieHasNoStocks() throws Exception {
         //Cenário
-        LocacaoService locacaoService = new LocacaoService();
         Usuario usuario = new Usuario("User");
-        Filme filme = new Filme("Filme 1", 0, 5.0);
+        Filme filme = new Filme("Filme 1", 2, 5.0);
+        Filme filmeWithoutStock = new Filme("Filme 1", 0, 5.0);
 
         //Ação
-        locacaoService.alugarFilme(usuario, filme);
-            // try/catch with Assert.fail();
+        locacaoService.alugarFilme(usuario, filme, filmeWithoutStock);
+        // try/catch with Assert.fail();
 
 
     }
@@ -105,7 +124,6 @@ public class LocacaoServiceTest {
     @Test
     public void throwsExceptionWhenUserIsNull() throws MovieWithoutStockException {
         //Cenário
-        LocacaoService locacaoService = new LocacaoService();
         Filme filme = new Filme("Filme 1", 5, 5.0);
 
         //Ação
@@ -120,17 +138,44 @@ public class LocacaoServiceTest {
 
     //Forma nova -> Útil para verificar a mensagem também
     @Test
-    public void throwsExceptionWhenMovieIsNull() throws MovieWithoutStockException, LocadoraException {
+    public void throwsExceptionWhenMoviesAreNull() throws MovieWithoutStockException, LocadoraException {
         //Cenário
-        LocacaoService locacaoService = new LocacaoService();
         Usuario usuario = new Usuario("User");
+
+
+        // Verificação dentro do cenário
+        expectedException.expectMessage("É necessário alugar pelo menos um filme");
+        expectedException.expect(LocadoraException.class);
+
+        //Ação
+        locacaoService.alugarFilme(usuario, null);
+    }
+
+    @Test
+    public void throwsExceptionWhenOneMovieIsNull() throws MovieWithoutStockException, LocadoraException {
+        //Cenário
+        Usuario usuario = new Usuario("User");
+        Filme filme = new Filme("Teste", 2, 10.0);
 
         // Verificação dentro do cenário
         expectedException.expectMessage("Filme vazio");
         expectedException.expect(LocadoraException.class);
 
         //Ação
-        locacaoService.alugarFilme(usuario, null);
+        locacaoService.alugarFilme(usuario, null, filme);
+    }
+
+    @Test
+    public void throwsExceptionWhenMoviesAreEmpty() throws MovieWithoutStockException, LocadoraException {
+        //Cenário
+        Usuario usuario = new Usuario("User");
+
+        // Verificação dentro do cenário
+        expectedException.expectMessage("É necessário alugar pelo menos um filme");
+        expectedException.expect(LocadoraException.class);
+
+        //Ação
+        locacaoService.alugarFilme(usuario);
     }
 
 
