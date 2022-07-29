@@ -16,4 +16,5 @@ public class Calculator {
         if(b == 0) throw new DivisionByZeroException();
         return a/b;
     }
+
 }

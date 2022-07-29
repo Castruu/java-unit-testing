@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="builderMaster">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/builderMaster.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -1,5 +1,8 @@
 package br.ce.wcaquino.servicos;
 
+import br.ce.wcaquino.builders.FilmeBuilder;
+import br.ce.wcaquino.daos.LocacaoDAO;
+import br.ce.wcaquino.daos.LocacaoDAOFake;
 import br.ce.wcaquino.entidades.Filme;
 import br.ce.wcaquino.entidades.Locacao;
 import br.ce.wcaquino.entidades.Usuario;
@@ -9,9 +12,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.mockito.Mockito;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -35,16 +38,17 @@ public class CalcValueLocacaoTest {
     @Before //-> Executa antes de todos os testes
     public void setup() {
         locacaoService = new LocacaoService();
-
+        locacaoService.setDao(Mockito.mock(LocacaoDAO.class));
+        locacaoService.setSpcService(Mockito.mock(SPCService.class));
     }
 
-    private static final Filme filme1 = new Filme("Filme 1", 2, 10.0);
-    private static final Filme filme2 = new Filme("Filme 2", 2, 10.0);
-    private static final Filme filme3 = new Filme("Filme 3", 2, 10.0);
-    private static final Filme filme4 = new Filme("Filme 4", 2, 10.0);
-    private static final Filme filme5 = new Filme("Filme 5", 2, 10.0);
-    private static final Filme filme6 = new Filme("Filme 6", 2, 10.0);
-    private static final Filme filme7 = new Filme("Filme 7", 2, 10.0);
+    private static final Filme filme1 = FilmeBuilder.createMovie().now();
+    private static final Filme filme2 = FilmeBuilder.createMovie().now();
+    private static final Filme filme3 = FilmeBuilder.createMovie().now();
+    private static final Filme filme4 = FilmeBuilder.createMovie().now();
+    private static final Filme filme5 = FilmeBuilder.createMovie().now();
+    private static final Filme filme6 = FilmeBuilder.createMovie().now();
+    private static final Filme filme7 = FilmeBuilder.createMovie().now();
 
     @Parameterized.Parameters(name = "{2}")
     public static List<Object[]> getParameters() {
@@ -69,7 +73,6 @@ public class CalcValueLocacaoTest {
 
         //Verificação
         assertThat(locacao.getValor(), is(valorLocacao));
-        System.out.println("Teste");
     }
 
 }
