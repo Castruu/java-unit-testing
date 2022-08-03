@@ -32,7 +32,14 @@ public class LocacaoService {
 			if(filme.getEstoque() == 0) throw new MovieWithoutStockException("Filme sem estoque");
 		}
 
-		if(spcService.isNegative(usuario)) {
+		boolean isNegative;
+		try {
+			isNegative = spcService.isNegative(usuario);
+		} catch (Exception e) {
+			throw new LocadoraException("Problemas com SPC, tente novamente");
+		}
+
+		if(isNegative) {
 			throw new LocadoraException("Usuário negativado");
 		}
 
@@ -40,15 +47,13 @@ public class LocacaoService {
 		Locacao locacao = new Locacao();
 		locacao.setFilmes(filmeList);
 		locacao.setUsuario(usuario);
-		locacao.setDataLocacao(new Date());
-		double totalValue = 0;
-		for (int i = 0; i < filmeList.size(); i++) {
-			totalValue += filmeList.get(i).getPrecoLocacao() * getModifier(i);
-		}
+		locacao.setDataLocacao(getDate());
+		double totalValue = getTotalValue(filmeList);
+
 		locacao.setValor(totalValue);
 
 		//Entrega no dia seguinte
-		Date dataEntrega = new Date();
+		Date dataEntrega = getDate();
 		dataEntrega = adicionarDias(dataEntrega, 1);
 		if(DataUtils.verificarDiaSemana(dataEntrega, Calendar.SUNDAY))
 			dataEntrega = adicionarDias(dataEntrega, 1);
@@ -68,25 +73,34 @@ public class LocacaoService {
 		}
 	}
 
-	public void setDao(LocacaoDAO dao) {
-		this.dao = dao;
+	public void lateLocacao(Locacao locacao, int days) {
+		Locacao newLocation = new Locacao();
+		newLocation.setUsuario(locacao.getUsuario());
+		newLocation.setFilmes(locacao.getFilmes());
+		newLocation.setDataLocacao(new Date());
+		newLocation.setDataRetorno(DataUtils.obterDataComDiferencaDias(days));
+		newLocation.setValor(locacao.getValor() * days);
+		dao.save(newLocation);
 	}
 
-
-	public void setSpcService(SPCService spcService) {
-		this.spcService = spcService;
+	private double getTotalValue(List<Filme> filmeList) {
+		System.out.println("Calculando...");
+		double sum = 0;
+		for (int i = 0; i < filmeList.size(); i++) {
+			sum += filmeList.get(i).getPrecoLocacao() * getModifier(i);
+		}
+		return sum;
 	}
-
-	public void setEmailService(EmailService emailService) {
-		this.emailService = emailService;
-	}
-
 	private double getModifier(int i) {
 		if(i == 2) return 0.75;
 		else if(i == 3) return 0.5;
 		else if(i == 4) return 0.25;
 		else if(i == 5) return 0;
 		return 1;
+	}
+
+	protected Date getDate() {
+		return new Date();
 	}
 
 

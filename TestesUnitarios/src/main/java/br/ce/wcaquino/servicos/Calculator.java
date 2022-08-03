@@ -5,6 +5,7 @@ import br.ce.wcaquino.exceptions.DivisionByZeroException;
 public class Calculator {
 
     public int sum(int a, int b) {
+        System.out.println("Sum...");
         return a + b;
     }
 
